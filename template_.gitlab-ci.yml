@@ -1,0 +1,100 @@
+# Stages of CI pipleline 
+stages:
+  - build
+  - validate
+
+# Job: Build docker image
+docker_build:
+  # Binded stage
+  stage: build
+
+  # Building using docker image (client side)
+  image: "docker:24.0.2"
+  
+  # Server side implements in service based on docker:dind image (Docker-in-Docker).
+  # This additional image is used to create another container, which is available to the first container. 
+  # The two containers have access to one another and can communicate when running the job.
+  # More info: https://docs.gitlab.com/ee/ci/services/
+  services:
+    - name: 'docker:24.0.2-dind-rootless'
+      command: ['--tls=false']
+
+  # Variables of job
+  variables:
+    # Variables DOCKER_HOST and DOCKER_TLS_CERTDIR needs for using docker from job script,
+    # more info look at "Docker-in-Docker with TLS disabled in the Docker executor"
+    # at page: https://docs.gitlab.com/ee/ci/docker/using_docker_build.html
+
+    # When using dind service, you must instruct docker to talk with the
+    # daemon started inside of the service. The daemon is available with
+    # a network connection instead of the default /var/run/docker.sock socket.
+    #
+    # The 'docker' hostname is the alias of the service container as described at
+    # https://docs.gitlab.com/ee/ci/docker/using_docker_images.html#accessing-the-services
+    #
+    # If you're using GitLab Runner 12.7 or earlier with the Kubernetes executor and Kubernetes 1.6 or earlier,
+    # the variable must be set to tcp://localhost:2375 because of how the
+    # Kubernetes executor connects services to the job container
+    # DOCKER_HOST: tcp://localhost:2375
+    #
+    DOCKER_HOST: tcp://docker:2375
+    #
+    # This instructs Docker not to start over TLS.
+    DOCKER_TLS_CERTDIR: ""
+    # Use the overlayfs driver for improved performance
+    # More info at: https://docs.docker.com/storage/storagedriver/select-storage-driver/
+    DOCKER_DRIVER: overlay2
+
+  # Before run script request info about Docker
+  before_script:
+    - docker info
+
+  # Running scripts within builder container
+  script:
+    # Description: if there is no tag on commit (CI_COMMIT_TAG is zero), then:
+    #   prepare CI_APPLICATION_REPOSITORY as CI_APPLICATION_REPOSITORY, if it exists or use format CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG,
+    #   prepare CI_APPLICATION_TAG as CI_APPLICATION_TAG if it exists, or use CI_COMMIT_SHA,
+    # else:
+    #   prepare CI_APPLICATION_REPOSITORY as CI_APPLICATION_REPOSITORY, if it exists or use CI_REGISTRY_IMAGE,
+    #   prepare CI_APPLICATION_TAG as CI_APPLICATION_TAG if it exists, or use CI_COMMIT_TAG.
+    - |
+      if [[ -z "$CI_COMMIT_TAG" ]]; then
+        export CI_APPLICATION_REPOSITORY=${CI_APPLICATION_REPOSITORY:-$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG}
+        export CI_APPLICATION_TAG=${CI_APPLICATION_TAG:-$CI_COMMIT_SHA}
+      else
+        export CI_APPLICATION_REPOSITORY=${CI_APPLICATION_REPOSITORY:-$CI_REGISTRY_IMAGE}
+        export CI_APPLICATION_TAG=${CI_APPLICATION_TAG:-$CI_COMMIT_TAG}
+      fi
+    # Build Docker image
+    - echo "Building and pushing image as $CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG"
+    - docker build -t "$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG" .
+    # Login to CI registry
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    # Publish image to CI registry
+    - docker push "$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG"
+
+  # Run job only if there is tag on commit, or CI_COMMIT_BRANCH is defined
+  rules:
+    - if: "$CI_COMMIT_TAG || $CI_COMMIT_BRANCH"
+
+
+# Job: Validate building. Uses for testing applications in container, when building is over
+testImage:
+  stage: validate
+
+  # Using current image as base
+  image: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
+
+  # Run script with simple request: version of gcc
+  script:
+    - "arm-none-eabi-gcc -v"
+
+  # Job dependency
+  needs:
+    - job: docker_build
+
+  # Run job only if there is tag on commit
+  rules:
+    - if: $CI_COMMIT_TAG
+
+
