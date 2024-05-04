@@ -6,14 +6,13 @@ RUN apt-get update && \
     apt-get install -y \
     sudo \
     build-essential \
-    wget
+    wget \
+    cmake \
+    git
 
 # Using toolchain version
 ARG ARM_TOOLCHAIN_VERSION="10.3-2021.10"
 ARG ARM_TOOLCHAIN_DIR="/opt/gcc-arm-none-eabi"
-
-# Set up a development tools directory
-# WORKDIR /opt
 
 # Download toolchain from official site
 # Extract all files to ARM_TOOLCHAIN_DIR
