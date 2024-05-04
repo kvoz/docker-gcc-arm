@@ -1,0 +1,7 @@
+{
+    "cortex-debug.gdbPath": "/usr/bin/gdb-multiarch",
+    "cortex-debug.openocdPath": "/usr/bin/openocd",
+    "cortex-debug.armToolchainPath": "/opt/gcc-arm-none-eabi/bin",
+    "C_Cpp.autoAddFileAssociations": false,
+    "files.insertFinalNewline": true,
+}

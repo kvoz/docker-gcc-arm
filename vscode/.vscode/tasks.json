@@ -1,0 +1,37 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Clean",
+			"type": "shell",
+			"group": "build",
+			"command": "make clean",
+			"problemMatcher": []
+		},
+		{
+			"label": "Build",
+			"type": "shell",
+			"group": "build",
+			"command": "make all -j8",
+			"problemMatcher": [
+				"$gcc",
+			],
+			"dependsOn": "Clean"
+		},
+		{
+			"label": "Flash",
+			"type": "shell",
+			"command": "openocd",
+			"args": [
+				"-f",
+				"interface/stlink-v2.cfg",
+				"-f",
+				"target/stm32f4x.cfg",
+				"-c",
+				"program ./build/${workspaceFolderBasename}.elf verify exit reset",
+			],
+			"dependsOn": "Build",
+			"problemMatcher": []
+		},
+	]
+}

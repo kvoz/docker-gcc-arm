@@ -1,0 +1,42 @@
+// See https://aka.ms/vscode-remote/devcontainer.json for format details.
+{
+    "name": "Stm32CubeIDE SDK",
+    "image": "image-docker-gcc-arm",
+    // Add the IDs of any extensions you want installed in the array below.
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "spmeesseman.vscode-taskexplorer",
+                "ms-vscode.makefile-tools",
+                "marus25.cortex-debug",
+                "mcu-debug.debug-tracker-vscode",
+                "IBM.output-colorizer",
+                "ms-vscode.cpptools",
+                "xaver.clang-format",
+                "cschlosser.doxdocgen",
+                "ms-vscode.cmake-tools"
+            ],
+            "settings": {
+                "terminal.integrated.defaultProfile.linux": "bash",
+                "terminal.integrated.profiles.linux": {
+                    "bash": {
+                        "path": "bash",
+                        "icon": "terminal-bash"
+                    }
+                },
+                "taskExplorer.pathToPrograms": {
+                    "make": "make"
+                }
+            }
+        }
+    },
+    "runArgs": [
+        // Provide access to the local devices (USB) of the host machine (need for ST-Link)
+        "--device=/dev/"
+    ],
+    "mounts": [
+        "type=bind,source=/dev,target=/dev"
+    ],
+    // After container creation install some software for working in IDE
+    "onCreateCommand": "sudo apt-get update && sudo apt-get -y install clang-format openocd gdb-multiarch"
+}
