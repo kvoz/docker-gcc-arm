@@ -1,4 +1,12 @@
 {
+    "editor.formatOnSave": true,
+    "makefile.configureOnOpen": true,
+    "[cpp]": {
+        "editor.defaultFormatter": "xaver.clang-format"
+    },
+    "[c]": {
+        "editor.defaultFormatter": "xaver.clang-format"
+    },
     "cortex-debug.gdbPath": "/usr/bin/gdb-multiarch",
     "cortex-debug.openocdPath": "/usr/bin/openocd",
     "cortex-debug.armToolchainPath": "/opt/gcc-arm-none-eabi/bin",
