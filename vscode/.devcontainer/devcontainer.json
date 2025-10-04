@@ -6,14 +6,16 @@
     "customizations": {
         "vscode": {
             "extensions": [
-                "spmeesseman.vscode-taskexplorer",
                 "ms-vscode.makefile-tools",
+                "ms-vscode.cpptools",
+                "ms-vscode.cpptools-extension-pack",
+                "xaver.clang-format",
+                "spmeesseman.vscode-taskexplorer",
                 "marus25.cortex-debug",
                 "mcu-debug.debug-tracker-vscode",
                 "IBM.output-colorizer",
-                "ms-vscode.cpptools",
-                "xaver.clang-format",
                 "cschlosser.doxdocgen",
+                "mhutchie.git-graph",
                 "ms-vscode.cmake-tools"
             ],
             "settings": {
@@ -31,7 +33,7 @@
         }
     },
     "runArgs": [
-        // Provide access to the local devices (USB) of the host machine (need for ST-Link)
+        // Provide access to the USB controller of the host machine (need for ST-Link)
         "--device=/dev/"
     ],
     "mounts": [
