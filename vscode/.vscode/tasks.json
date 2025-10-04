@@ -9,10 +9,20 @@
 			"problemMatcher": []
 		},
 		{
-			"label": "Build",
+			"label": "Build Release",
 			"type": "shell",
 			"group": "build",
-			"command": "make all -j8",
+			"command": "make all -j8 -e OPT=-O3 DEBUG=0",
+			"problemMatcher": [
+				"$gcc",
+			],
+			"dependsOn": "Clean"
+		},
+		{
+			"label": "Build Debug",
+			"type": "shell",
+			"group": "build",
+			"command": "make all -j8 -e OPT=-O0 DEBUG=1",
 			"problemMatcher": [
 				"$gcc",
 			],
